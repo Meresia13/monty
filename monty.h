@@ -1,24 +1,23 @@
-#ifndef MONTY_H
-#define MONTY_H
-#define _POSIX_C_SOURCE 200809L
+#ifndef TADEM_H
+#define TADEM_H
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
-
-#define STACK 0
-#define QUEUE 1
-#define DELIM " \t"
+#include <ctype.h>
 
 /**
- * struct stack_s - doubly linked list representation of a stack (or queue)
- * @n: integer
- * @prev: points to the previous element of the stack (or queue)
- * @next: points to the next element of the stack (or queue)
- *
- * Description: doubly linked list node structure
- * for stack, queues, LIFO, FIFO
- */
+* struct stack_s - doubly linked list representation of a stack (or queue)
+* @n: integer
+* @prev: points to the previous element of the stack (or queue)
+* @next: points to the next element of the stack (or queue)
+*
+* Description: doubly linked list node structure
+* for stack, queues, LIFO, FIFO
+*/
 typedef struct stack_s
 {
 	int n;
@@ -26,89 +25,64 @@ typedef struct stack_s
 	struct stack_s *next;
 } stack_t;
 
+
 /**
- * struct instruction_s - opcode and its function
- * @opcode: the opcode
- * @f: function to handle the opcode
- *
- * Description: opcode and its function
- * for stack, queues, LIFO, FIFO
- */
+* struct instruction_s - opcode and its function
+* @opcode: the opcode
+* @f: function to handle the opcode
+*
+* Description: opcode and its function
+* for stack, queues, LIFO, FIFO
+*/
 typedef struct instruction_s
 {
 	char *opcode;
 	void (*f)(stack_t **stack, unsigned int line_number);
 } instruction_t;
 
+
 /**
- * struct global_s - a global struct to hold info regarding the entire project
- * @head: head of the stack
- * @tail: tail of the stack
- * @mode: mode of the data LIFO or FIFO
- * @quit: variable for exit
- * @arg: argument if any
- */
-typedef struct global_s
+* struct bus_s - variables -args, file, line content
+* @arg: value
+* @file: pointer to monty file
+* @content: line content
+* @lifi: flag change stack <-> queue
+*
+* Description: carries values through the program
+*/
+typedef struct bus_s
 {
-	stack_t *head;
-	stack_t *tail;
-	int mode;
-	int quit;
 	char *arg;
-} global_t;
+	FILE *file;
+	char *content;
+	int lifi;
+}  bus_t;
+extern bus_t bus;
 
-/* ========== Globals =========== */
-extern global_t global;
+char *_realloc(char *ptr, unsigned int old_size, unsigned int new_size);
+ssize_t getstdin(char **lineptr, int file);
+char  *clean_line(char *content);
+void f_push(stack_t **head, unsigned int number);
+void f_pall(stack_t **head, unsigned int number);
+void f_pint(stack_t **head, unsigned int number);
+int execute(char *content, stack_t **head, unsigned int counter, FILE *file);
+void free_stack(stack_t *head);
+void f_pop(stack_t **head, unsigned int counter);
+void f_swap(stack_t **head, unsigned int counter);
+void f_add(stack_t **head, unsigned int counter);
+void f_nop(stack_t **head, unsigned int counter);
+void f_sub(stack_t **head, unsigned int counter);
+void f_div(stack_t **head, unsigned int counter);
+void f_mul(stack_t **head, unsigned int counter);
+void f_mod(stack_t **head, unsigned int counter);
+void f_pchar(stack_t **head, unsigned int counter);
+void f_pstr(stack_t **head, unsigned int counter);
+void f_rotl(stack_t **head, unsigned int counter);
+void f_rotr(stack_t **head, __attribute__((unused)) unsigned int counter);
+void addnode(stack_t **head, int n);
+void addqueue(stack_t **head, int n);
+void f_queue(stack_t **head, unsigned int counter);
+void f_stack(stack_t **head, unsigned int counter);
 
-/* =========== Handlers ============ */
-void push_handler(stack_t **, unsigned int);
-void pall_handler(stack_t **, unsigned int);
-void pop_handler(stack_t **, unsigned int);
-void swap_handler(stack_t **, unsigned int);
-void add_handler(stack_t **, unsigned int);
-void nop_handler(stack_t **, unsigned int);
-void sub_handler(stack_t **, unsigned int);
-void mul_handler(stack_t **, unsigned int);
-void div_handler(stack_t **, unsigned int);
-void mod_handler(stack_t **, unsigned int);
-void pint_handler(stack_t **, unsigned int);
-void rotl_handler(stack_t **, unsigned int);
-void pstr_handler(stack_t **, unsigned int);
-void pchr_handler(stack_t **, unsigned int);
-void rotr_handler(stack_t **, unsigned int);
-instruction_t _get_handler(const char *);
 
-/* =========== Stack Ops =========== */
-void push(int);
-int pop(void);
-void print_stack(void);
-
-/* =========== Queue Ops =========== */
-int dequeue(void);
-void print_queue(void);
-void enqueue(int);
-
-/* =========== custome Ops =========== */
-void swap(void);
-void calculator(char, char *,  int);
-
-/* ========== File handlers ========= */
-char *read_file(const char *);
-
-/* ========== Parse functions ========= */
-void parse_instructions(char **);
-int simple_opcodes(char **);
-
-/* ========== Helpers ========== */
-int is_delim(char, char *);
-char **strtow(char *, char *);
-int _isdigit(int);
-int is_number(char *);
-int arrlen(char **);
-void truncate_on_empty_line(char *);
-
-/* ========== Memory functions ========== */
-void clear_memory(void);
-void free_tokenized(char **);
-
-#endif /* MONTY_H */
+#endif
